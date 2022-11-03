@@ -23,13 +23,19 @@ const Peer = window.Peer;
     SDK: ${sdkSrc ? sdkSrc.src : 'unknown'}
   `.trim();
 
+  
 
   const localStream = await navigator.mediaDevices
     .getUserMedia({
       audio: true,
       video: true,
-    })
-    .catch(console.error);
+    }).catch(console.error);
+
+  // try{
+  //   const localStream = await navigator.mediaDevices.getUserMedia9({audio: true, video: true,});
+  // } catch(err) {
+  //   console.error("Error: " + err);
+  // }
 
   // Render local stream
   localVideo.muted = true;
@@ -92,25 +98,64 @@ const Peer = window.Peer;
       newID.className = 'id-name';
       remoteVideos.append(newID);
     
-      const useId = document.getElementById(`${stream.peerId}`);
+      let useId = document.getElementById(`${stream.peerId}`);
       useId.textContent += `--${stream.peerId}--`;
 
       useId.addEventListener('click', () =>{
-        console.log(`${stream.peerId}`);
-        bigOne.append(newVideo);
+        if(bigOne.childNodes.length === 2){
+          
+          const bigOneVideo = bigOne.firstChild;
+          remoteVideos.append(bigOneVideo);
 
-        const anotherID = document.createElement('p');
-        anotherID.id = `-${stream.peerId}`;
-        anotherID.className = '-id-name';
-        bigOne.append(anotherID);
+          const bigOneId = bigOne.lastChild;
+          const newRemoteID = document.createElement('button');
+          newRemoteID.id = `${bigOneId.id}`;
+          newRemoteID.className = 'id-name';
+          remoteVideos.append(newRemoteID);
 
-        const usedId = document.getElementById(`-${stream.peerId}`);
-        usedId.textContent += `~~${stream.peerId}~~`;
+          // const newRemoteText = remoteVideos.lastChild;
+          // newRemoteText.textContent += `--${newRemoteID.id}--`;
 
-        useId.remove();
+
+          bigOne.innerHTML ='';
+          
+          console.log(`${stream.peerId}`);
+          bigOne.append(newVideo);
+
+          const anotherID = document.createElement('p');
+          anotherID.id = `${stream.peerId}`;
+          anotherID.className = '-id-name';
+          bigOne.append(anotherID);
+
+          const usedId = document.getElementById(`${stream.peerId}`);
+          usedId.textContent += `--${stream.peerId}--`;
+
+          useId.remove();
+          useId = remoteVideos.lastChild;
+          useId.textContent += `--${newRemoteID.id}--`;
+
+        }else{
+          console.log(`${stream.peerId}`);
+          bigOne.append(newVideo);
+
+          const anotherID = document.createElement('p');
+          anotherID.id = `${stream.peerId}`;
+          anotherID.className = '-id-name';
+          bigOne.append(anotherID);
+
+          const usedId = document.getElementById(`${stream.peerId}`);
+          usedId.textContent += `--${stream.peerId}--`;
+
+          useId.remove();
+
+        }
+
+        
 
       });
     });
+
+
 
     room.on('data', ({ data, src }) => {
       // Show a message sent to the room and who sent
@@ -175,105 +220,161 @@ const Peer = window.Peer;
   });
 
   // Register join handler(receive only)
-  // receiveOnlyJoinTrigger.addEventListener('click', () => {
-  //   // Note that you need to ensure the peer has connected to signaling server
-  //   // before using methods of peer instance.
-  //   if (!peer.open) {
-  //     return;
-  //   }
+  receiveOnlyJoinTrigger.addEventListener('click', () => {
+    // Note that you need to ensure the peer has connected to signaling server
+    // before using methods of peer instance.
+    if (!peer.open) {
+      return;
+    }
 
-  //   const room = peer.joinRoom(roomId.value, {
-  //     mode: 'mesh',
-  //   });
+    const room = peer.joinRoom(roomId.value, {
+      mode: 'mesh',
+    });
 
-  //   room.once('open', () => {
-  //     messages.textContent += '=== You joined (receive only)===\n';
-  //   });
-  //   room.on('peerJoin', peerId => {
-  //     messages.textContent += `=== ${peerId} joined (receive only)===\n`;
-  //   });
+    room.once('open', () => {
+      messages.textContent += '=== You joined ===\n';
+    });
+    room.on('peerJoin', peerId => {
+      messages.textContent += `=== ${peerId} joined ===\n`;
+    });
 
-  //   // Render remote stream for new peer join in the room
-  //   room.on('stream', async stream => {
-  //     const newVideo = document.createElement('video');
-  //     newVideo.srcObject = stream;
-  //     newVideo.playsInline = true;
+    // Render remote stream for new peer join in the room
+    room.on('stream', async stream => {
+      const newVideo = document.createElement('video');
+      newVideo.srcObject = stream;
+      newVideo.playsInline = true;
 
-  //     // mark peerId to find it later at peerLeave event
-  //     newVideo.setAttribute('data-peer-id', stream.peerId);
-  //     remoteVideos.append(newVideo);
-  //     //bigOne.append(newVideo);
-  //     await newVideo.play().catch(console.error);
+      // mark peerId to find it later at peerLeave event
+      newVideo.setAttribute('data-peer-id', stream.peerId);
+      remoteVideos.append(newVideo);
+      //bigOne.append(newVideo);
+      await newVideo.play().catch(console.error);
 
-  //     const newID = document.createElement('p');
-  //     newID.id = `${stream.peerId}`;
-  //     newID.className = 'id-name';
-  //     remoteVideos.append(newID);
+      // ID name
+      const newID = document.createElement('button');
+      newID.id = `${stream.peerId}`;
+      newID.className = 'id-name';
+      remoteVideos.append(newID);
     
-  //     const useId = document.getElementById(`${stream.peerId}`);
-  //     useId.textContent += `--${stream.peerId}--`;
-  //   });
+      let useId = document.getElementById(`${stream.peerId}`);
+      useId.textContent += `--${stream.peerId}--`;
 
-  //   room.on('data', ({ data, src }) => {
-  //     // Show a message sent to the room and who sent
-  //     messages.textContent += `${src}: ${data}\n`;
-  //   });
+      useId.addEventListener('click', () =>{
+        if(bigOne.childNodes.length === 2){
+          
+          const bigOneVideo = bigOne.firstChild;
+          remoteVideos.append(bigOneVideo);
 
-  //   // for closing room members
-  //   room.on('peerLeave', peerId => {
-  //     const remoteVideo = remoteVideos.querySelector(
-  //       `[data-peer-id="${peerId}"]`
-  //     );
-  //     remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-  //     remoteVideo.srcObject = null;
-  //     remoteVideo.remove();
+          const bigOneId = bigOne.lastChild;
+          const newRemoteID = document.createElement('button');
+          newRemoteID.id = `${bigOneId.id}`;
+          newRemoteID.className = 'id-name';
+          remoteVideos.append(newRemoteID);
 
-  //     messages.textContent += `=== ${peerId} left ===\n`;
+          // const newRemoteText = remoteVideos.lastChild;
+          // newRemoteText.textContent += `--${newRemoteID.id}--`;
+
+
+          bigOne.innerHTML ='';
+          
+          console.log(`${stream.peerId}`);
+          bigOne.append(newVideo);
+
+          const anotherID = document.createElement('p');
+          anotherID.id = `${stream.peerId}`;
+          anotherID.className = '-id-name';
+          bigOne.append(anotherID);
+
+          const usedId = document.getElementById(`${stream.peerId}`);
+          usedId.textContent += `--${stream.peerId}--`;
+
+          useId.remove();
+          useId = remoteVideos.lastChild;
+          useId.textContent += `--${newRemoteID.id}--`;
+
+        }else{
+          console.log(`${stream.peerId}`);
+          bigOne.append(newVideo);
+
+          const anotherID = document.createElement('p');
+          anotherID.id = `${stream.peerId}`;
+          anotherID.className = '-id-name';
+          bigOne.append(anotherID);
+
+          const usedId = document.getElementById(`${stream.peerId}`);
+          usedId.textContent += `--${stream.peerId}--`;
+
+          useId.remove();
+
+        }
+
+        
+
+      });
+    });
+
+
+
+    room.on('data', ({ data, src }) => {
+      // Show a message sent to the room and who sent
+      messages.textContent += `${src}: ${data}\n`;
+    });
+
+    // for closing room members
+    room.on('peerLeave', peerId => {
+      const remoteVideo = remoteVideos.querySelector(
+        `[data-peer-id="${peerId}"]`
+      );
+      remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+      remoteVideo.srcObject = null;
+      remoteVideo.remove();
+
+      messages.textContent += `=== ${peerId} left ===\n`;
       
-  //     const remoteVideoId = remoteVideos.querySelector(
-  //       `[id="${peerId}"]`
-  //     );
-  //     remoteVideoId.remove();
-  //   });
+      const remoteVideoId = remoteVideos.querySelector(
+        `[id="${peerId}"]`
+      );
+      remoteVideoId.remove();
+    });
 
-  //   // for closing myself
-  //   room.once('close', () => {
-  //     sendTrigger.removeEventListener('click', onClickSend);
-  //     messages.textContent += '== You left ===\n';
+    // for closing myself
+    room.once('close', () => {
+      sendTrigger.removeEventListener('click', onClickSend);
+      messages.textContent += '== You left ===\n';
 
-  //     //It's not a good way to do it, so it needs improvement.
-  //     //remoteVideos.innerHTML = '';
-
-  //     // Array.from(remoteVideos.children).forEach(remoteVideo => {
-  //     //   remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-  //     //   remoteVideo.srcObject = null;
-  //     //   remoteVideo.remove();
-  //     // });
-
-  //     Array.from(remoteVideos.children).forEach(remoteVideo => {
-  //       if(remoteVideo.className === 'id-name'){
-  //         remoteVideo.remove();
-  //       } else{
-  //         remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-  //         remoteVideo.srcObject = null;
-  //         remoteVideo.remove();
-  //       }
-  //     });
+      Array.from(remoteVideos.children).forEach(remoteVideo => {
+        if(remoteVideo.className === 'id-name'){
+          remoteVideo.remove();
+        } else{
+          remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+          remoteVideo.srcObject = null;
+          remoteVideo.remove();
+        }
+      });
       
+      Array.from(bigOne.children).forEach(remoteVideo => {
+        if(remoteVideo.className === '-id-name'){
+          remoteVideo.remove();
+        } else{
+          remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+          remoteVideo.srcObject = null;
+          remoteVideo.remove();
+        }
+      });
 
-  //   });
+    });
 
-  //   sendTrigger.addEventListener('click', onClickSend);
-  //   leaveTrigger.addEventListener('click', () => room.close(), { once: true });
+    sendTrigger.addEventListener('click', onClickSend);
+    leaveTrigger.addEventListener('click', () => room.close(), { once: true });
 
-  //   function onClickSend() {
-  //     // Send message to all of the peers in the room via websocket
-  //     room.send(localText.value);
+    function onClickSend() {
+      // Send message to all of the peers in the room via websocket
+      room.send(localText.value);
 
-  //     messages.textContent += `${peer.id}: ${localText.value}\n`;
-  //     localText.value = '';
-  //   }
-  // });
+      messages.textContent += `${peer.id}: ${localText.value}\n`;
+      localText.value = '';
+    }
 
+  });
   peer.on('error', console.error);
 })();

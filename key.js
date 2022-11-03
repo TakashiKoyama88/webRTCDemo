@@ -1,1 +1,1 @@
-window.__SKYWAY_KEY__ = 'a7f3cd99-5381-488a-bd17-d5e5861d1f70';
+window.__SKYWAY_KEY__ = 'd907c6b9-51fb-428f-bf99-088cf599a0d3';
