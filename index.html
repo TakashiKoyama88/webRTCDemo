@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Multi-view broadcasting</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="heading">Multi-view broadcasting</h1>
+
+      <div>
+        <div class="remote-stream-big-one" id="js-remote-stream-big-one"></div>
+      </div>
+    
+      <div>
+        <div class="remote-streams" id="js-remote-streams"></div>
+      </div>
+
+      <div class="room">
+        <div>
+          <video id="js-local-stream"></video>
+          <input type="text" placeholder="Room Name" id="js-room-id">
+          <button id="js-join-trigger">Join</button>
+          <button id="js-receive-only-join-trigger">Join(Receive only)</button>
+          <button id="js-leave-trigger">Leave</button>
+          <button id="js-mute-trigger">mute</button>
+          <p id="js-mute-state">Mute State: Muted</p>
+        </div>
+
+        
+
+        <div>
+          <pre class="messages" id="js-messages"></pre>
+          <input type="text" id="js-local-text">
+          <button id="js-send-trigger">Send</button>
+        </div>
+      </div>
+      
+      <p class="meta" id="js-meta"></p>
+    </div>
+
+    
+
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-4.4.5.js"></script>
+    <script src="./key.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
