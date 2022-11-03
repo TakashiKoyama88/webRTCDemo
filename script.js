@@ -15,7 +15,7 @@ const Peer = window.Peer;
   const muteState = document.getElementById('js-mute-state');
   const bigOne = document.getElementById('js-remote-stream-big-one');
   const receiveOnlyJoinTrigger = document.getElementById('js-receive-only-join-trigger');
-  
+  var peerIDArray = [];
   let userNumber = 0;
 
   meta.innerText = `
@@ -101,6 +101,8 @@ const Peer = window.Peer;
       let useId = document.getElementById(`${stream.peerId}`);
       useId.textContent += `--${stream.peerId}--`;
 
+      peerIDArray.push(`${stream.peerId}`);
+
       useId.addEventListener('click', () =>{
         if(bigOne.childNodes.length === 2){
           
@@ -154,8 +156,27 @@ const Peer = window.Peer;
 
       });
     });
+  
+    const peerIDButtons = document.getElementsByClassName('id-name');
 
+    // peerIDButtons.addEventListener(`click`, ()=>{
+    //   for(let i = 0; i < peerIDArray.length; i++){
+    //     if(peerIDButtons === peerIDArray[i]){
+    //       console.log(`${stream.peerId}`);
+    //       bigOne.append(newVideo);
 
+    //       const anotherID = document.createElement('p');
+    //       anotherID.id = `${stream.peerId}`;
+    //       anotherID.className = '-id-name';
+    //       bigOne.append(anotherID);
+
+    //       const usedId = document.getElementById(`${stream.peerId}`);
+    //       usedId.textContent += `--${stream.peerId}--`;
+
+    //       useId.remove();
+    //     }
+    //   }
+    // });
 
     room.on('data', ({ data, src }) => {
       // Show a message sent to the room and who sent
