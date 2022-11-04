@@ -23,6 +23,7 @@ const Peer = window.Peer;
     SDK: ${sdkSrc ? sdkSrc.src : 'unknown'}
   `.trim();
 
+  console.log(window.__SYWAYKAY__);
   
 
   const localStream = await navigator.mediaDevices
