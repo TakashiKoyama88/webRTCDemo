@@ -326,7 +326,7 @@ const Peer = window.Peer;
 
     const room = peer.joinRoom(roomId.value, {
       mode: 'mesh',
-      stream: localStream,
+      // stream: localStream,
     });
 
     room.once('open', () => {
