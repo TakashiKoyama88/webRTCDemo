@@ -23,7 +23,6 @@ const Peer = window.Peer;
     SDK: ${sdkSrc ? sdkSrc.src : 'unknown'}
   `.trim();
 
-  console.log(window.__SYWAYKAY__);
   
 
   const localStream = await navigator.mediaDevices
@@ -54,10 +53,10 @@ const Peer = window.Peer;
   muteTrigger.addEventListener('click', () =>{
     if(localVideo.muted === true){
       localVideo.muted =false;
-      muteState.innerHTML='Mute State: Not muted';
+      muteState.innerHTML='Mute State: Muted';
     }else{
       localVideo.muted = true;
-      muteState.innerHTML='Mute State: Muted';
+      muteState.innerHTML='Mute State: Not Muted';
     }
   })
 
@@ -84,8 +83,11 @@ const Peer = window.Peer;
     // Render remote stream for new peer join in the room
     room.on('stream', async stream => {
       const newVideo = document.createElement('video');
+
       newVideo.srcObject = stream;
       newVideo.playsInline = true;
+
+      
 
       // mark peerId to find it later at peerLeave event
       newVideo.setAttribute('data-peer-id', stream.peerId);
@@ -101,6 +103,24 @@ const Peer = window.Peer;
     
       let useId = document.getElementById(`${stream.peerId}`);
       useId.textContent += `--${stream.peerId}--`;
+
+      // mute button
+      const muteButtonId = document.createElement('button');
+      muteButtonId.id = `--${stream.peerId}`;
+      muteButtonId.className = 'mute-state';
+      remoteVideos.append(muteButtonId);
+    
+      const muteButton = document.getElementById(`--${stream.peerId}`);
+      muteButton.textContent =  `${stream.peerId} : Not muted`;
+      muteButton.addEventListener('click', () =>{
+        if(stream.getAudioTracks()[0].enabled === false){
+          stream.getAudioTracks()[0].enabled = true;
+          muteButton.textContent = `${stream.peerId} : Not muted`;
+        } else{
+          stream.getAudioTracks()[0].enabled = false;
+          muteButton.textContent = `${stream.peerId} : Muted`;
+        }
+      });
 
       peerIDArray.push(`${stream.peerId}`);
 
@@ -133,7 +153,9 @@ const Peer = window.Peer;
           const usedId = document.getElementById(`${stream.peerId}`);
           usedId.textContent += `--${stream.peerId}--`;
 
+          muteButton.remove();
           useId.remove();
+
           useId = remoteVideos.lastChild;
           useId.textContent += `--${newRemoteID.id}--`;
 
@@ -149,35 +171,81 @@ const Peer = window.Peer;
           const usedId = document.getElementById(`${stream.peerId}`);
           usedId.textContent += `--${stream.peerId}--`;
 
+          muteButton.remove();
           useId.remove();
 
         }
 
-        
 
       });
+
+      // const peerIDButtons = document.getElementsByClassName('id-name');
+      // console.log(peerIDButtons);
+
+      // for(let i = 0; i < peerIDButtons.length; i++){
+      //   peerIDButtons[i].addEventListener(`click`, ()=>{
+  
+      //     //console.log(peerIDButtons[i]);
+  
+      //     if(bigOne.childNodes.length === 2){
+            
+      //       const bigOneVideo = bigOne.firstChild;
+      //       remoteVideos.append(bigOneVideo);
+  
+      //       const bigOneId = bigOne.lastChild;
+      //       const newRemoteID = document.createElement('button');
+      //       newRemoteID.id = `${bigOneId.id}`;
+      //       newRemoteID.className = 'id-name';
+      //       remoteVideos.append(newRemoteID);
+  
+      //       const newRemoteText = remoteVideos.lastChild;
+      //       newRemoteText.textContent += `--${newRemoteID.id}--`;
+  
+  
+      //       bigOne.innerHTML ='';
+            
+            
+      //       console.log(`--${peerIDButtons[i].id}`);
+
+  
+      //       bigOne.append(newVideo);
+  
+      //       const anotherID = document.createElement('p');
+      //       anotherID.id = `${peerIDButtons[i].id}`;
+      //       anotherID.className = '-id-name';
+      //       bigOne.append(anotherID);
+  
+      //       const usedId = document.getElementById(`${peerIDButtons[i].id}`);
+      //       usedId.textContent += `--${peerIDButtons[i].id}--`;
+  
+            
+      //       peerIDButtons[i].remove();
+            
+      //     }else{
+      //       console.log(`++${peerIDButtons[i].id}`);
+
+      //       bigOne.append(newVideo);
+  
+      //       const anotherID = document.createElement('p');
+      //       anotherID.id = `${peerIDButtons[i].id}`;
+      //       anotherID.className = '-id-name';
+      //       bigOne.append(anotherID);
+  
+      //       const usedId = document.getElementById(`${peerIDButtons[i].id}`);
+      //       usedId.textContent += `--${peerIDButtons[i].id}--`;
+  
+  
+      //       useId.remove();
+      //     }
+      //   })
+      // }
+
     });
   
-    const peerIDButtons = document.getElementsByClassName('id-name');
+    
 
-    // peerIDButtons.addEventListener(`click`, ()=>{
-    //   for(let i = 0; i < peerIDArray.length; i++){
-    //     if(peerIDButtons === peerIDArray[i]){
-    //       console.log(`${stream.peerId}`);
-    //       bigOne.append(newVideo);
 
-    //       const anotherID = document.createElement('p');
-    //       anotherID.id = `${stream.peerId}`;
-    //       anotherID.className = '-id-name';
-    //       bigOne.append(anotherID);
-
-    //       const usedId = document.getElementById(`${stream.peerId}`);
-    //       usedId.textContent += `--${stream.peerId}--`;
-
-    //       useId.remove();
-    //     }
-    //   }
-    // });
+    
 
     room.on('data', ({ data, src }) => {
       // Show a message sent to the room and who sent
@@ -199,6 +267,11 @@ const Peer = window.Peer;
         `[id="${peerId}"]`
       );
       remoteVideoId.remove();
+
+      const remoteVideoMuted = remoteVideos.querySelector(
+        `[id="--${peerId}"]`
+      );
+      remoteVideoMuted.remove();
     });
 
     // for closing myself
@@ -209,7 +282,9 @@ const Peer = window.Peer;
       Array.from(remoteVideos.children).forEach(remoteVideo => {
         if(remoteVideo.className === 'id-name'){
           remoteVideo.remove();
-        } else{
+        } else if(remoteVideo.className === 'mute-state'){
+          remoteVideo.remove();
+        } else {
           remoteVideo.srcObject.getTracks().forEach(track => track.stop());
           remoteVideo.srcObject = null;
           remoteVideo.remove();
@@ -251,6 +326,7 @@ const Peer = window.Peer;
 
     const room = peer.joinRoom(roomId.value, {
       mode: 'mesh',
+      stream: localStream,
     });
 
     room.once('open', () => {
@@ -263,8 +339,11 @@ const Peer = window.Peer;
     // Render remote stream for new peer join in the room
     room.on('stream', async stream => {
       const newVideo = document.createElement('video');
+
       newVideo.srcObject = stream;
       newVideo.playsInline = true;
+
+      
 
       // mark peerId to find it later at peerLeave event
       newVideo.setAttribute('data-peer-id', stream.peerId);
@@ -280,6 +359,26 @@ const Peer = window.Peer;
     
       let useId = document.getElementById(`${stream.peerId}`);
       useId.textContent += `--${stream.peerId}--`;
+
+      // mute button
+      const muteButtonId = document.createElement('button');
+      muteButtonId.id = `--${stream.peerId}`;
+      muteButtonId.className = 'mute-state';
+      remoteVideos.append(muteButtonId);
+    
+      const muteButton = document.getElementById(`--${stream.peerId}`);
+      muteButton.textContent =  `${stream.peerId} : Not muted`;
+      muteButton.addEventListener('click', () =>{
+        if(stream.getAudioTracks()[0].enabled === false){
+          stream.getAudioTracks()[0].enabled = true;
+          muteButton.textContent = `${stream.peerId} : Muted`;
+        } else{
+          stream.getAudioTracks()[0].enabled = false;
+          muteButton.textContent = `${stream.peerId} : Not Muted`;
+        }
+      });
+
+      peerIDArray.push(`${stream.peerId}`);
 
       useId.addEventListener('click', () =>{
         if(bigOne.childNodes.length === 2){
@@ -310,7 +409,9 @@ const Peer = window.Peer;
           const usedId = document.getElementById(`${stream.peerId}`);
           usedId.textContent += `--${stream.peerId}--`;
 
+          muteButton.remove();
           useId.remove();
+
           useId = remoteVideos.lastChild;
           useId.textContent += `--${newRemoteID.id}--`;
 
@@ -326,16 +427,81 @@ const Peer = window.Peer;
           const usedId = document.getElementById(`${stream.peerId}`);
           usedId.textContent += `--${stream.peerId}--`;
 
+          muteButton.remove();
           useId.remove();
 
         }
 
-        
 
       });
+
+      // const peerIDButtons = document.getElementsByClassName('id-name');
+      // console.log(peerIDButtons);
+
+      // for(let i = 0; i < peerIDButtons.length; i++){
+      //   peerIDButtons[i].addEventListener(`click`, ()=>{
+  
+      //     //console.log(peerIDButtons[i]);
+  
+      //     if(bigOne.childNodes.length === 2){
+            
+      //       const bigOneVideo = bigOne.firstChild;
+      //       remoteVideos.append(bigOneVideo);
+  
+      //       const bigOneId = bigOne.lastChild;
+      //       const newRemoteID = document.createElement('button');
+      //       newRemoteID.id = `${bigOneId.id}`;
+      //       newRemoteID.className = 'id-name';
+      //       remoteVideos.append(newRemoteID);
+  
+      //       const newRemoteText = remoteVideos.lastChild;
+      //       newRemoteText.textContent += `--${newRemoteID.id}--`;
+  
+  
+      //       bigOne.innerHTML ='';
+            
+            
+      //       console.log(`--${peerIDButtons[i].id}`);
+
+  
+      //       bigOne.append(newVideo);
+  
+      //       const anotherID = document.createElement('p');
+      //       anotherID.id = `${peerIDButtons[i].id}`;
+      //       anotherID.className = '-id-name';
+      //       bigOne.append(anotherID);
+  
+      //       const usedId = document.getElementById(`${peerIDButtons[i].id}`);
+      //       usedId.textContent += `--${peerIDButtons[i].id}--`;
+  
+            
+      //       peerIDButtons[i].remove();
+            
+      //     }else{
+      //       console.log(`++${peerIDButtons[i].id}`);
+
+      //       bigOne.append(newVideo);
+  
+      //       const anotherID = document.createElement('p');
+      //       anotherID.id = `${peerIDButtons[i].id}`;
+      //       anotherID.className = '-id-name';
+      //       bigOne.append(anotherID);
+  
+      //       const usedId = document.getElementById(`${peerIDButtons[i].id}`);
+      //       usedId.textContent += `--${peerIDButtons[i].id}--`;
+  
+  
+      //       useId.remove();
+      //     }
+      //   })
+      // }
+
     });
+  
+    
 
 
+    
 
     room.on('data', ({ data, src }) => {
       // Show a message sent to the room and who sent
@@ -357,6 +523,11 @@ const Peer = window.Peer;
         `[id="${peerId}"]`
       );
       remoteVideoId.remove();
+
+      const remoteVideoMuted = remoteVideos.querySelector(
+        `[id="--${peerId}"]`
+      );
+      remoteVideoMuted.remove();
     });
 
     // for closing myself
@@ -367,7 +538,9 @@ const Peer = window.Peer;
       Array.from(remoteVideos.children).forEach(remoteVideo => {
         if(remoteVideo.className === 'id-name'){
           remoteVideo.remove();
-        } else{
+        } else if(remoteVideo.className === 'mute-state'){
+          remoteVideo.remove();
+        } else {
           remoteVideo.srcObject.getTracks().forEach(track => track.stop());
           remoteVideo.srcObject = null;
           remoteVideo.remove();
@@ -398,5 +571,7 @@ const Peer = window.Peer;
     }
 
   });
+
+
   peer.on('error', console.error);
 })();
